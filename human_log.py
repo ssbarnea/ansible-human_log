@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -13,8 +14,13 @@
 
 # Inspired from: https://github.com/redhat-openstack/khaleesi/blob/master/plugins/callbacks/human_log.py
 # Further improved support Ansible 2.0
-
 from __future__ import (absolute_import, division, print_function)
+import sys
+import codecs
+
+sys.stdout = codecs.getwriter('utf8')(sys.stdout)
+sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+
 __metaclass__ = type
 
 try:
@@ -43,7 +49,7 @@ class CallbackModule(object):
                 no_log = data.get('_ansible_no_log')
                 if field in data.keys() and data[field] and no_log != True:
                     output = self._format_output(data[field])
-                    print("\n{0}: {1}".format(field, output.replace("\\n","\n")))
+                    print("\n{0}: {1}".format(field, output.replace("\\n", "\n")))
 
     def _format_output(self, output):
         # Strip unicode
@@ -151,7 +157,6 @@ class CallbackModule(object):
 
     def on_file_diff(self, host, diff):
         pass
-
 
     ####### V2 METHODS ######
     def v2_on_any(self, *args, **kwargs):
