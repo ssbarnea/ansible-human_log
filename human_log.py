@@ -16,10 +16,13 @@
 # Further improved support Ansible 2.0
 from __future__ import (absolute_import, division, print_function)
 import sys
-import codecs
 
-sys.stdout = codecs.getwriter('utf8')(sys.stdout)
-sys.stderr = codecs.getwriter('utf8')(sys.stderr)
+# Unicode workarounds based on https://pythonhosted.org/kitchen/unicode-frustrations.html
+from kitchen.text.converters import getwriter
+
+encoding = 'utf8'
+sys.stdout = getwriter(encoding)(sys.stdout)
+sys.stderr = getwriter(encoding)(sys.stderr)
 
 __metaclass__ = type
 
@@ -54,11 +57,11 @@ class CallbackModule(object):
     def _format_output(self, output):
         # Strip unicode
         if type(output) == unicode:
-            output = output.encode('ascii', 'replace')
+            output = output.encode(encoding, 'replace')
 
         # If output is a dict
         if type(output) == dict:
-            return json.dumps(output, indent=2)
+            return json.dumps(output, indent=2, ensure_ascii=False).encode(encoding)
 
         # If output is a list of dicts
         if type(output) == list and type(output[0]) == dict:
@@ -72,7 +75,7 @@ class CallbackModule(object):
                         if field in item.keys():
                             copy[field] = self._format_output(item[field])
                 real_output.append(copy)
-            return json.dumps(output, indent=2)
+            return json.dumps(output, indent=2, ensure_ascii=False).encode(encoding)
 
         # If output is a list of strings
         if type(output) == list and type(output[0]) != dict:
@@ -93,7 +96,7 @@ class CallbackModule(object):
                 return " ".join(real_output)
 
         # Otherwise it's a string, (or an int, float, etc.) just return it
-        return str(output)
+        return unicode(output)
 
     def on_any(self, *args, **kwargs):
         pass
